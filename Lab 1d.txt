@@ -1,0 +1,17 @@
++---------------------------------+
+|           <<interface>>         |
+|              List               |
++---------------------------------+
+| - elements: T[]                 |
+| - size: integer                 |
++---------------------------------+
+| + create(): void                |
+| + isEmpty(): boolean            |
+| + size(): integer               |
+| + add(index: integer, element: T): void |
+| + remove(index: integer): T     |
+| + get(index: integer): T        |
+| + set(index: integer, element: T): T |
+| + indexOf(element: T): integer  |
+| + clear(): void                 |
++---------------------------------+
