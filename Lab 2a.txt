@@ -1,0 +1,191 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Minimal Student class (placeholder; can use full version from previous response)
+class Course {
+private:
+    string course_code;
+    string course_name;
+public:
+    Course(string code = "", string name = "") : course_code(code), course_name(name) {}
+    string get_course_code() const { return course_code; }
+    string get_course_name() const { return course_name; }
+};
+
+class Grade {
+private:
+    int mark;
+    char the_grade;
+public:
+    Grade(int m = 0) : mark(m) {
+        the_grade = (m > 69) ? 'A' : (m > 59) ? 'B' : (m > 49) ? 'C' : (m > 39) ? 'D' : 'E';
+    }
+    int get_mark() const { return mark; }
+    char get_grade() const { return the_grade; }
+};
+
+class Student {
+private:
+    string reg_number;
+    string name;
+    int age;
+    Course course;
+    Grade grade;
+public:
+    Student(string reg = "", string n = "", int a = 0, Course c = Course(), Grade g = Grade())
+        : reg_number(reg.substr(0, 20)), name(n.substr(0, 50)), age(a), course(c), grade(g) {}
+    string get_regNo() const { return reg_number; }
+    string get_name() const { return name; }
+    int get_age() const { return age; }
+    Course get_course() const { return course; }
+    Grade get_grade() const { return grade; }
+};
+
+// Array-based List class
+class List {
+private:
+    static const int MAX_SIZE = 40; // From Lab 1
+    Student students[MAX_SIZE];      // Array to store students
+    int size;                       // Current number of students
+public:
+    // Constructor for empty list
+    List() : size(0) {}
+    
+    // Constructor with one initial student
+    List(const Student& s) : size(1) {
+        students[0] = s;
+    }
+    
+    // Copy constructor
+    List(const List& other) : size(other.size) {
+        for (int i = 0; i < size; i++) {
+            students[i] = other.students[i];
+        }
+    }
+    
+    // Add student to the end
+    void add_student(const Student& s) {
+        if (size >= MAX_SIZE) {
+            cout << "List is full!" << endl;
+            return;
+        }
+        students[size] = s;
+        size++;
+        cout << "Student " << s.get_regNo() << " added." << endl;
+    }
+    
+    // Add student at specific position
+    void add_student_at(const Student& s, int position) {
+        if (position < 0 || position > size || size >= MAX_SIZE) {
+            cout << "Invalid position or list is full!" << endl;
+            return;
+        }
+        for (int i = size; i > position; i--) {
+            students[i] = students[i - 1];
+        }
+        students[position] = s;
+        size++;
+        cout << "Student " << s.get_regNo() << " added at position " << position << "." << endl;
+    }
+    
+    // Remove student by matching registration number
+    void remove_student(const Student& s) {
+        for (int i = 0; i < size; i++) {
+            if (students[i].get_regNo() == s.get_regNo()) {
+                remove_student_at(i);
+                return;
+            }
+        }
+        cout << "Student " << s.get_regNo() << " not found!" << endl;
+    }
+    
+    // Remove student at specific position
+    void remove_student_at(int position) {
+        if (position < 0 || position >= size) {
+            cout << "Invalid position!" << endl;
+            return;
+        }
+        for (int i = position; i < size - 1; i++) {
+            students[i] = students[i + 1];
+        }
+        size--;
+        cout << "Student at position " << position << " removed." << endl;
+    }
+    
+    // Get size
+    int get_size() const {
+        return size;
+    }
+    
+    // Destroy (clear) the list
+    void destroy() {
+        size = 0;
+        cout << "List cleared." << endl;
+    }
+    
+    // Helper method to display list (for testing)
+    void display() const {
+        if (size == 0) {
+            cout << "List is empty." << endl;
+            return;
+        }
+        for (int i = 0; i < size; i++) {
+            cout << "Student " << i << ": Reg: " << students[i].get_regNo()
+                 << ", Name: " << students[i].get_name()
+                 << ", Age: " << students[i].get_age()
+                 << ", Course: " << students[i].get_course().get_course_code()
+                 << " (" << students[i].get_course().get_course_name() << ")"
+                 << ", Mark: " << students[i].get_grade().get_mark()
+                 << ", Grade: " << students[i].get_grade().get_grade() << endl;
+        }
+    }
+};
+
+// Driver code to test the List class
+int main() {
+    // Test empty constructor
+    List student_list;
+    cout << "Created empty list. Size: " << student_list.get_size() << endl;
+    
+    // Test single-student constructor
+    Student s1("REG001", "Alice Smith", 20, Course("CS101", "Data Structures"), Grade(75));
+    List single_list(s1);
+    cout << "\nCreated list with one student. Size: " << single_list.get_size() << endl;
+    single_list.display();
+    
+    // Test copy constructor
+    List copied_list(single_list);
+    cout << "\nCreated copy of list. Size: " << copied_list.get_size() << endl;
+    copied_list.display();
+    
+    // Add students
+    cout << "\nAdding students to empty list:\n";
+    student_list.add_student(Student("REG002", "Bob Johnson", 21, Course("CS102", "Algorithms"), Grade(65)));
+    student_list.add_student(Student("REG003", "Carol White", 19, Course("CS103", "Operating Systems"), Grade(55)));
+    student_list.add_student_at(Student("REG004", "David Brown", 22, Course("CS104", "Databases"), Grade(45)), 1);
+    
+    // Display list
+    cout << "\nList after adding students (Size: " << student_list.get_size() << "):\n";
+    student_list.display();
+    
+    // Test removing student by object
+    cout << "\nRemoving student REG002:\n";
+    student_list.remove_student(Student("REG002", "", 0, Course(), Grade()));
+    
+    // Test removing student by position
+    cout << "\nRemoving student at position 1:\n";
+    student_list.remove_student_at(1);
+    
+    // Display list after removals
+    cout << "\nList after removals (Size: " << student_list.get_size() << "):\n";
+    student_list.display();
+    
+    // Test destroy
+    cout << "\nDestroying the list:\n";
+    student_list.destroy();
+    cout << "List size after destroy: " << student_list.get_size() << endl;
+    student_list.display();
+    
+    return 0;
+}
