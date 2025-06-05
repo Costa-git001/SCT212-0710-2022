@@ -1,0 +1,110 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Course {
+private:
+    string course_code;
+    string course_name;
+public:
+    Course(string code = "", string name = "") : course_code(code), course_name(name) {}
+    void set_course_code(string code) { course_code = code; }
+    void set_course_name(string name) { course_name = name; }
+    string get_course_code() const { return course_code; }
+    string get_course_name() const { return course_name; }
+};
+
+class Grade {
+private:
+    int mark;
+    char the_grade;
+    bool is_set;
+public:
+    Grade(int m = 0) : mark(m), is_set(false) {
+        if (m >= 0 && m <= 100) {
+            the_grade = calculate_grade();
+            is_set = true;
+        } else {
+            the_grade = 'E';
+        }
+    }
+    void set_mark(int m) {
+        if (!is_set && m >= 0 && m <= 100) {
+            mark = m;
+            the_grade = calculate_grade();
+            is_set = true;
+        }
+    }
+    int get_mark() const { return mark; }
+    char get_grade() const { return the_grade; }
+    bool is_grade_set() const { return is_set; }
+private:
+    char calculate_grade() const {
+        if (mark > 69) return 'A';
+        if (mark > 59) return 'B';
+        if (mark > 49) return 'C';
+        if (mark > 39) return 'D';
+        return 'E';
+    }
+};
+
+class Student {
+private:
+    string reg_number;
+    string name;
+    int age;
+    Course course;
+    Grade grade;
+public:
+    Student(string reg = "", string n = "", int a = 0, Course c = Course(), Grade g = Grade()) 
+        : reg_number(reg.substr(0, 20)), name(n.substr(0, 50)), age(a), course(c), grade(g) {}
+    void set_regNo(string reg) { reg_number = reg.substr(0, 20); }
+    void set_name(string n) { name = n.substr(0, 50); }
+    void set_age(int a) { age = a; }
+    void set_course(Course c) { course = c; }
+    void set_grade(Grade g) { grade = g; }
+    void set_marks(int m) { grade.set_mark(m); }
+    string get_regNo() const { return reg_number; }
+    string get_name() const { return name; }
+    int get_age() const { return age; }
+    Course get_course() const { return course; }
+    Grade get_grade() const { return grade; }
+    int get_marks() const { return grade.get_mark(); }
+    void calculate_grade() {
+        if (!grade.is_grade_set()) {
+            grade.set_mark(grade.get_mark());
+        } else {
+            cout << "Grade for " << reg_number << " is already set and cannot be modified." << endl;
+        }
+    }
+};
+
+int main() {
+    Student s1("REG001", "Alice Smith", 20, Course("CS101", "Data Structures"), Grade(75));
+    Student s2("REG002", "Bob Johnson", 21, Course("CS102", "Algorithms"), Grade(0));
+    Student s3("REG003", "Carol White", 19, Course("CS103", "Operating Systems"), Grade(55));
+    
+    cout << "Testing calculate_grade():\n";
+    
+    cout << "\nStudent 1 (" << s1.get_regNo() << "):\n";
+    cout << "Initial Mark: " << s1.get_marks() << ", Grade: " << s1.get_grade().get_grade() << endl;
+    s1.calculate_grade();
+    s1.set_marks(85);
+    cout << "After calculate_grade() and attempted update: Mark: " << s1.get_marks() 
+         << ", Grade: " << s1.get_grade().get_grade() << endl;
+    
+    cout << "\nStudent 2 (" << s2.get_regNo() << "):\n";
+    cout << "Initial Mark: " << s2.get_marks() << ", Grade: " << s2.get_grade().get_grade() << endl;
+    s2.set_marks(65);
+    s2.calculate_grade();
+    cout << "After setting mark and calculate_grade(): Mark: " << s2.get_marks() 
+         << ", Grade: " << s2.get_grade().get_grade() << endl;
+    
+    cout << "\nStudent 3 (" << s3.get_regNo() << "):\n";
+    cout << "Initial Mark: " << s3.get_marks() << ", Grade: " << s3.get_grade().get_grade() << endl;
+    s3.calculate_grade();
+    cout << "After calculate_grade(): Mark: " << s3.get_marks() 
+         << ", Grade: " << s3.get_grade().get_grade() << endl;
+    
+    return 0;
+}
