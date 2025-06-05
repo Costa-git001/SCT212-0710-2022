@@ -1,0 +1,128 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Course ADT
+class Course {
+private:
+    string course_code; // e.g., "CS101"
+    string course_name; // e.g., "Data Structures"
+public:
+    // Constructor
+    Course(string code = "", string name = "") : course_code(code), course_name(name) {}
+    
+    // Setters
+    void set_course_code(string code) { course_code = code; }
+    void set_course_name(string name) { course_name = name; }
+    
+    // Getters
+    string get_course_code() const { return course_code; }
+    string get_course_name() const { return course_name; }
+};
+
+// Grade ADT
+class Grade {
+private:
+    int mark; // 0 to 100
+    char the_grade; // A, B, C, D, E
+    bool is_set; // Prevents grade modification
+public:
+    // Constructor
+    Grade(int m = 0) : mark(m), is_set(false) {
+        if (m >= 0 && m <= 100) {
+            the_grade = calculate_grade();
+            is_set = true;
+        } else {
+            the_grade = 'E';
+        }
+    }
+    
+    // Setters
+    void set_mark(int m) {
+        if (!is_set && m >= 0 && m <= 100) {
+            mark = m;
+            the_grade = calculate_grade();
+            is_set = true;
+        }
+    }
+    
+    // Getters
+    int get_mark() const { return mark; }
+    char get_grade() const { return the_grade; }
+    bool is_grade_set() const { return is_set; }
+private:
+    char calculate_grade() const {
+        if (mark > 69) return 'A';
+        if (mark > 59) return 'B';
+        if (mark > 49) return 'C';
+        if (mark > 39) return 'D';
+        return 'E';
+    }
+};
+
+// Student class
+class Student {
+private:
+    string reg_number; // Max 20 chars
+    string name;       // Max 50 chars
+    int age;
+    Course course;
+    Grade grade;
+public:
+    // Constructor
+    Student(string reg = "", string n = "", int a = 0, Course c = Course(), Grade g = Grade()) 
+        : reg_number(reg.substr(0, 20)), name(n.substr(0, 50)), age(a), course(c), grade(g) {}
+    
+    // Setters
+    void set_regNo(string reg) { reg_number = reg.substr(0, 20); }
+    void set_name(string n) { name = n.substr(0, 50); }
+    void set_age(int a) { age = a; }
+    void set_course(Course c) { course = c; }
+    void set_grade(Grade g) { grade = g; }
+    void set_marks(int m) { grade.set_mark(m); }
+    
+    // Getters
+    string get_regNo() const { return reg_number; }
+    string get_name() const { return name; }
+    int get_age() const { return age; }
+    Course get_course() const { return course; }
+    Grade get_grade() const { return grade; }
+    int get_marks() const { return grade.get_mark(); }
+};
+
+// Test program to demonstrate Student class functionalities
+int main() {
+    // Create a student
+    Student s1("REG001", "Alice Smith", 20, Course("CS101", "Data Structures"), Grade(75));
+    
+    // Test getters
+    cout << "Initial Student Details:\n";
+    cout << "Registration Number: " << s1.get_regNo() << endl;
+    cout << "Name: " << s1.get_name() << endl;
+    cout << "Age: " << s1.get_age() << endl;
+    cout << "Course: " << s1.get_course().get_course_code() << " (" 
+         << s1.get_course().get_course_name() << ")" << endl;
+    cout << "Mark: " << s1.get_marks() << endl;
+    cout << "Grade: " << s1.get_grade().get_grade() << endl;
+    
+    // Test setters
+    cout << "\nUpdating Student Details:\n";
+    s1.set_regNo("REG002");
+    s1.set_name("Alice Johnson");
+    s1.set_age(21);
+    s1.set_course(Course("CS102", "Algorithms"));
+    s1.set_grade(Grade(85)); // Set new grade
+    s1.set_marks(90); // Should not update if grade is locked
+    
+    // Display updated details
+    cout << "Updated Student Details:\n";
+    cout << "Registration Number: " << s1.get_regNo() << endl;
+    cout << "Name: " << s1.get_name() << endl;
+    cout << "Age: " << s1.get_age() << endl;
+    cout << "Course: " << s1.get_course().get_course_code() << " (" 
+         << s1.get_course().get_course_name() << ")" << endl;
+    cout << "Mark: " << s1.get_marks() << endl;
+    cout << "Grade: " << s1.get_grade().get_grade() << endl;
+    
+    return 0;
+}
