@@ -1,0 +1,401 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_REG 20
+#define MAX_NAME 50
+
+struct Course {
+    char course_code[20];
+    char course_name[50];
+};
+
+struct Grade {
+    int mark;
+    char the_grade;
+    int is_set;
+};
+
+struct Student {
+    char reg_number[MAX_REG + 1];
+    char name[MAX_NAME + 1];
+    int age;
+    struct Course course;
+    struct Grade grade;
+};
+
+struct Node {
+    struct Student student;
+    struct Node* next;
+};
+
+struct List {
+    struct Node* head;
+    int size;
+};
+
+void course_init(struct Course* c, const char* code, const char* name) {
+    strncpy(c->course_code, code, 19);
+    c->course_code[19] = '\0';
+    strncpy(c->course_name, name, 49);
+    c->course_name[49] = '\0';
+}
+
+void course_set_code(struct Course* c, const char* code) {
+    strncpy(c->course_code, code, 19);
+    c->course_code[19] = '\0';
+}
+
+void course_set_name(struct Course* c, const char* name) {
+    strncpy(c->course_name, name, 49);
+    c->course_name[49] = '\0';
+}
+
+char* course_get_code(struct Course* c) {
+    return c->course_code;
+}
+
+char* course_get_name(struct Course* c) {
+    return c->course_name;
+}
+
+void grade_init(struct Grade* g, int m) {
+    g->mark = m;
+    g->is_set = 0;
+    if (m >= 0 && m <= 100) {
+        g->the_grade = m > 69 ? 'A' : m > 59 ? 'B' : m > 49 ? 'C' : m > 39 ? 'D' : 'E';
+        g->is_set = 1;
+    } else {
+        g->the_grade = 'E';
+    }
+}
+
+void grade_set_mark(struct Grade* g, int m) {
+    if (!g->is_set && m >= 0 && m <= 100) {
+        g->mark = m;
+        g->the_grade = m > 69 ? 'A' : m > 59 ? 'B' : m > 49 ? 'C' : m > 39 ? 'D' : 'E';
+        g->is_set = 1;
+    }
+}
+
+int grade_get_mark(struct Grade* g) {
+    return g->mark;
+}
+
+char grade_get_grade(struct Grade* g) {
+    return g->the_grade;
+}
+
+int grade_is_set(struct Grade* g) {
+    return g->is_set;
+}
+
+void student_init(struct Student* s, const char* reg, const char* name, int age, 
+                 struct Course c, struct Grade g) {
+    strncpy(s->reg_number, reg, MAX_REG);
+    s->reg_number[MAX_REG] = '\0';
+    strncpy(s->name, name, MAX_NAME);
+    s->name[MAX_NAME] = '\0';
+    s->age = age;
+    s->course = c;
+    s->grade = g;
+}
+
+void student_set_regNo(struct Student* s, const char* reg) {
+    strncpy(s->reg_number, reg, MAX_REG);
+    s->reg_number[MAX_REG] = '\0';
+}
+
+void student_set_name(struct Student* s, const char* name) {
+    strncpy(s->name, name, MAX_NAME);
+    s->name[MAX_NAME] = '\0';
+}
+
+void student_set_age(struct Student* s, int age) {
+    s->age = age;
+}
+
+void student_set_course(struct Student* s, struct Course c) {
+    s->course = c;
+}
+
+void student_set_grade(struct Student* s, struct Grade g) {
+    s->grade = g;
+}
+
+void student_set_marks(struct Student* s, int m) {
+    grade_set_mark(&s->grade, m);
+}
+
+char* student_get_regNo(struct Student* s) {
+    return s->reg_number;
+}
+
+char* student_get_name(struct Student* s) {
+    return s->name;
+}
+
+int student_get_age(struct Student* s) {
+    return s->age;
+}
+
+struct Course student_get_course(struct Student* s) {
+    return s->course;
+}
+
+struct Grade student_get_grade(struct Student* s) {
+    return s->grade;
+}
+
+int student_get_marks(struct Student* s) {
+    return grade_get_mark(&s->grade);
+}
+
+void student_calculate_grade(struct Student* s) {
+    if (!grade_is_set(&s->grade)) {
+        grade_set_mark(&s->grade, grade_get_mark(&s->grade));
+    } else {
+        printf("Grade for %s is already set and cannot be modified.\n", s->reg_number);
+    }
+}
+
+void list_init(struct List* list) {
+    list->head = NULL;
+    list->size = 0;
+}
+
+void list_init_single(struct List* list, struct Student s) {
+    list->head = (struct Node*)malloc(sizeof(struct Node));
+    list->head->student = s;
+    list->head->next = NULL;
+    list->size = 1;
+}
+
+void list_init_copy(struct List* list, struct List* other) {
+    list->head = NULL;
+    list->size = 0;
+    struct Node* current = other->head;
+    struct Node* last = NULL;
+    while (current != NULL) {
+        struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+        new_node->student = current->student;
+        new_node->next = NULL;
+        if (list->head == NULL) {
+            list->head = new_node;
+        } else {
+            last->next = new_node;
+        }
+        last = new_node;
+        list->size++;
+        current = current->next;
+    }
+}
+
+void list_add_student(struct List* list, struct Student s) {
+    struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+    new_node->student = s;
+    new_node->next = NULL;
+    if (list->head == NULL) {
+        list->head = new_node;
+    } else {
+        struct Node* current = list->head;
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        current->next = new_node;
+    }
+    list->size++;
+    printf("Student %s added.\n", s.reg_number);
+}
+
+void list_add_student_at(struct List* list, struct Student s, int position) {
+    if (position < 0 || position > list->size) {
+        printf("Invalid position!\n");
+        return;
+    }
+    struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+    new_node->student = s;
+    if (position == 0) {
+        new_node->next = list->head;
+        list->head = new_node;
+    } else {
+        struct Node* current = list->head;
+        for (int i = 0; i < position - 1; i++) {
+            current = current->next;
+        }
+        new_node->next = current->next;
+        current->next = new_node;
+    }
+    list->size++;
+    printf("Student %s added at position %d.\n", s.reg_number, position);
+}
+
+void list_remove_student(struct List* list, struct Student s) {
+    struct Node* current = list->head;
+    struct Node* prev = NULL;
+    int position = 0;
+    while (current != NULL) {
+        if (strcmp(current->student.reg_number, s.reg_number) == 0) {
+            if (prev == NULL) {
+                list->head = current->next;
+            } else {
+                prev->next = current->next.Org);
+            }
+            free(current);
+            list->size--;
+            printf("Student %s removed.\n", s.reg_number);
+            return;
+        }
+        prev = current;
+        current = current->next;
+        position++;
+    }
+    printf("Student %s not found!\n", s.reg_number);
+}
+
+void list_remove_student_at(struct List* list, int position) {
+    if (position < 0 || position >= list->size || list->head == NULL) {
+        printf("Invalid position!\n");
+        return;
+    }
+    struct Node* current = list->head;
+    struct Node* prev = NULL;
+    for (int i = 0; i < position; i++) {
+        prev = current;
+        current = current->next;
+    }
+    if (prev == NULL) {
+        list->head = current->next;
+    } else {
+        prev->next = current->next;
+    }
+    free(current);
+    list->size--;
+    printf("Student at position %d removed.\n", position);
+}
+
+int list_get_size(struct List* list) {
+    return list->size;
+}
+
+void list_destroy(struct List* list) {
+    struct Node* current = list->head;
+    while (current != NULL) {
+        struct Node* temp = current;
+        current = current->next;
+        free(temp);
+    }
+    list->head = NULL;
+    list->size = 0;
+    printf("List cleared.\n");
+}
+
+struct Student* list_get_student(struct List* list, int index) {
+    if (index < 0 || index >= list->size) {
+        printf("Invalid index!\n");
+        return NULL;
+    }
+    struct Node* current = list->head;
+    for (int i = 0; i < index; i++) {
+        current = current->next;
+    }
+    return &current->student;
+}
+
+void list_display(struct List* list) {
+    if (list->size == 0) {
+        printf("List is empty.\n");
+        return;
+    }
+    struct Node* current = list->head;
+    int i = 0;
+    while (current != NULL) {
+        printf("Student %d: Reg: %s, Name: %s, Age: %d, Course: %s (%s), Mark: %d, Grade: %c\n",
+               i, current->student.reg_number, current->student.name, current->student.age,
+               current->student.course.course_code, current->student.course.course_name,
+               current->student.grade.mark, current->student.grade.the_grade);
+        current = current->next;
+        i++;
+    }
+}
+
+int main() {
+    struct List student_list;
+    list_init(&student_list);
+    
+    struct Course c1; course_init(&c1, "CS101", "Data Structures");
+    struct Course c2; course_init(&c2, "CS102", "Algorithms");
+    struct Course c3; course_init(&c3, "CS103", "Operating Systems");
+    struct Course c4; course_init(&c4, "CS104", "Databases");
+    struct Course c5; course_init(&c5, "CS105", "Networking");
+    struct Course c6; course_init(&c6, "CS106", "AI");
+    struct Course c7; course_init(&c7, "CS107", "Machine Learning");
+    struct Course c8; course_init(&c8, "CS108", "Web Development");
+    struct Course c9; course_init(&c9, "CS109", "Cybersecurity");
+    struct Course c10; course_init(&c10, "CS110", "Cloud Computing");
+    struct Course c11; course_init(&c11, "CS111", "Software Engineering");
+    struct Course c12; course_init(&c12, "CS112", "Mobile Apps");
+    struct Course c13; course_init(&c13, "CS113", "Graphics");
+    struct Course c14; course_init(&c14, "CS114", "Big Data");
+    struct Course c15; course_init(&c15, "CS115", "IoT");
+    
+    struct Grade g; grade_init(&g, 0);
+    struct Student s;
+    
+    student_init(&s, "REG001", "Alice Smith", 20, c1, g); list_add_student(&student_list, s);
+    student_init(&s, "REG002", "Bob Johnson", 21, c2, g); list_add_student(&student_list, s);
+    student_init(&s, "REG003", "Carol White", 19, c3, g); list_add_student(&student_list, s);
+    student_init(&s, "REG004", "David Brown", 22, c4, g); list_add_student(&student_list, s);
+    student_init(&s, "REG005", "Emma Davis", 20, c5, g); list_add_student(&student_list, s);
+    student_init(&s, "REG006", "Frank Wilson", 21, c6, g); list_add_student(&student_list, s);
+    student_init(&s, "REG007", "Grace Lee", 19, c7, g); list_add_student(&student_list, s);
+    student_init(&s, "REG008", "Henry Moore", 23, c8, g); list_add_student(&student_list, s);
+    student_init(&s, "REG009", "Isabella Clark", 20, c9, g); list_add_student(&student_list, s);
+    student_init(&s, "REG010", "James Taylor", 22, c10, g); list_add_student(&student_list, s);
+    student_init(&s, "REG011", "Kelly Adams", 21, c11, g); list_add_student(&student_list, s);
+    student_init(&s, "REG012", "Liam Harris", 20, c12, g); list_add_student(&student_list, s);
+    student_init(&s, "REG013", "Mia Lewis", 19, c13, g); list_add_student(&student_list, s);
+    student_init(&s, "REG014", "Noah Walker", 22, c14, g); list_add_student(&student_list, s);
+    student_init(&s, "REG015", "Olivia Young", 21, c15, g); list_add_student(&student_list, s);
+    
+    printf("\nInitial Student List (Size: %d):\n", list_get_size(&student_list));
+    list_display(&student_list);
+    
+    printf("\nUpdating marks for some students:\n");
+    student_set_marks(list_get_student(&student_list, 0), 82);
+    student_calculate_grade(list_get_student(&student_list, 0));
+    printf("Updated REG001: Mark = %d, Grade = %c\n", 
+           student_get_marks(list_get_student(&student_list, 0)), 
+           student_get_grade(list_get_student(&student_list, 0)).the_grade);
+    
+    student_set_marks(list_get_student(&student_list, 1), 95);
+    student_calculate_grade(list_get_student(&student_list, 1));
+    printf("Updated REG002: Mark = %d, Grade = %c\n", 
+           student_get_marks(list_get_student(&student_list, 1)), 
+           student_get_grade(list_get_student(&student_list, 1)).the_grade);
+    
+    student_set_marks(list_get_student(&student_list, 2), 45);
+    student_calculate_grade(list_get_student(&student_list, 2));
+    printf("Updated REG003: Mark = %d, Grade = %c\n", 
+           student_get_marks(list_get_student(&student_list, 2)), 
+           student_get_grade(list_get_student(&student_list, 2)).the_grade);
+    
+    student_set_marks(list_get_student(&student_list, 0), 90);
+    printf("Attempted update REG001: Mark = %d, Grade = %c\n", 
+           student_get_marks(list_get_student(&student_list, 0)), 
+           student_get_grade(list_get_student(&student_list, 0)).the_grade);
+    
+    printf("\nCalculating grades for all students:\n");
+    for (int i = 0; i < list_get_size(&student_list); i++) {
+        student_calculate_grade(list_get_student(&student_list, i));
+        printf("Student %s: Grade = %c\n", 
+               student_get_regNo(list_get_student(&student_list, i)), 
+               student_get_grade(list_get_student(&student_list, i)).the_grade);
+    }
+    
+    printf("\nFinal Student List (Size: %d):\n", list_get_size(&student_list));
+    list_display(&student_list);
+    
+    list_destroy(&student_list);
+    return 0;
+}
