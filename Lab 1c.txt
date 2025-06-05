@@ -1,0 +1,216 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+using namespace std;
+
+
+class Course {
+private:
+    string course_code;
+    string course_name;
+
+public:
+    
+    Course(const string& code = "", const string& name = "") 
+        : course_code(code), course_name(name) {}
+
+    
+    string getCourseCode() const { return course_code; }
+    string getCourseName() const { return course_name; }
+
+   
+    void setCourseCode(const string& code) { course_code = code; }
+    void setCourseName(const string& name) { course_name = name; }
+};
+
+
+class Grade {
+private:
+    int mark;
+    char the_grade;
+    bool isCalculated;
+
+public:
+   
+    Grade() : mark(-1), the_grade(' '), isCalculated(false) {}
+
+   
+    int getMark() const { return mark; }
+    char getGrade() const { return the_grade; }
+    bool getIsCalculated() const { return isCalculated; }
+
+    
+    bool setMark(int newMark) {
+        if (isCalculated) {
+            cout << "Grade already calculated and cannot be altered." << endl;
+            return false;
+        }
+        if (newMark < 0 || newMark > 100) {
+            cout << "Invalid mark. Must be between 0 and 100." << endl;
+            return false;
+        }
+        mark = newMark;
+        the_grade = calculateGrade();
+        isCalculated = true;
+        return true;
+    }
+
+private:
+    
+    char calculateGrade() const {
+        if (mark > 69) return 'A';
+        if (mark > 59) return 'B';
+        if (mark > 49) return 'C';
+        if (mark > 39) return 'D';
+        return 'E';
+    }
+};
+
+class Student {
+private:
+    char registration_number[21]; 
+    char name[51];               
+    int age;
+    Course course;
+    Grade grades;
+
+public:
+
+    Student(const char* reg_num = "", const char* name_str = "", int age_val = 0,
+            const string& course_code = "", const string& course_name = "")
+        : age(age_val), course(course_code, course_name) {
+        strncpy(registration_number, reg_num, 20);
+        registration_number[20] = '\0';
+        strncpy(name, name_str, 50);
+        name[50] = '\0';
+    }
+
+    const char* getRegistrationNumber() const { return registration_number; }
+    const char* getName() const { return name; }
+    int getAge() const { return age; }
+    Course getCourse() const { return course; }
+    Grade getGrades() const { return grades; }
+
+    void setName(const char* new_name) {
+        strncpy(name, new_name, 50);
+        name[50] = '\0';
+    }
+    void setAge(int new_age) { age = new_age; }
+    void setCourse(const string& code, const string& name) {
+        course.setCourseCode(code);
+        course.setCourseName(name);
+    }
+    bool setMark(int mark) { return grades.setMark(mark); }
+};
+
+class StudentSystem {
+private:
+    Student students[40]; 
+    int studentCount;
+
+public:
+
+    StudentSystem() : studentCount(0) {}
+
+    bool addStudent(const char* reg_num, const char* name, int age, 
+                   const string& course_code, const string& course_name) {
+        if (studentCount >= 40) {
+            cout << "Cannot add more students. Limit of 40 reached." << endl;
+            return false;
+        }
+
+        for (int i = 0; i < studentCount; i++) {
+            if (strcmp(students[i].getRegistrationNumber(), reg_num) == 0) {
+                cout << "Registration number already exists." << endl;
+                return false;
+            }
+        }
+
+        if (strlen(reg_num) > 20 || strlen(name) > 50) {
+            cout << "Registration number or name exceeds maximum length." << endl;
+            return false;
+        }
+
+        students[studentCount] = Student(reg_num, name, age, course_code, course_name);
+        studentCount++;
+        cout << "Student added successfully." << endl;
+        return true;
+    }
+
+    bool editStudent(const char* reg_num, const char* new_name, int new_age, 
+                    const string& new_course_code, const string& new_course_name) {
+        for (int i = 0; i < studentCount; i++) {
+            if (strcmp(students[i].getRegistrationNumber(), reg_num) == 0) {
+                if (strlen(new_name) > 50) {
+                    cout << "Name exceeds maximum length." << endl;
+                    return false;
+                }
+                students[i].setName(new_name);
+                students[i].setAge(new_age);
+                students[i].setCourse(new_course_code, new_course_name);
+                cout << "Student details updated successfully." << endl;
+                return true;
+            }
+        }
+        cout << "Student with registration number " << reg_num << " not found." << endl;
+        return false;
+    }
+
+    bool addMarks(const char* reg_num, int mark) {
+        for (int i = 0; i < studentCount; i++) {
+            if (strcmp(students[i].getRegistrationNumber(), reg_num) == 0) {
+                if (students[i].setMark(mark)) {
+                    cout << "Marks added and grade calculated successfully." << endl;
+                    return true;
+                }
+                return false;
+            }
+        }
+        cout << "Student with registration number " << reg_num << " not found." << endl;
+        return false;
+    }
+
+    void displayStudents() const {
+        if (studentCount == 0) {
+            cout << "No students in the system." << endl;
+            return;
+        }
+
+        for (int i = 0; i < studentCount; i++) {
+            cout << "Student " << i + 1 << ":" << endl;
+            cout << "Registration Number: " << students[i].getRegistrationNumber() << endl;
+            cout << "Name: " << students[i].getName() << endl;
+            cout << "Age: " << students[i].getAge() << endl;
+            cout << "Course Code: " << students[i].getCourse().getCourseCode() << endl;
+            cout << "Course Name: " << students[i].getCourse().getCourseName() << endl;
+            if (students[i].getGrades().getIsCalculated()) {
+                cout << "Mark: " << students[i].getGrades().getMark() << endl;
+                cout << "Grade: " << students[i].getGrades().getGrade() << endl;
+            } else {
+                cout << "Mark: Not assigned" << endl;
+                cout << "Grade: Not assigned" << endl;
+            }
+            cout << "------------------------" << endl;
+        }
+    }
+};
+
+int main() {
+    StudentSystem system;
+
+    system.addStudent("REG001", "John Kamau", 20, "CS101", "Computer Science");
+    system.addStudent("REG002", "Jane Nyagothie", 19, "MA101", "Mathematics");
+
+    system.editStudent("REG001", "John Updated", 21, "CS102", "Advanced Computer Science");
+
+    system.addStudent("REG003", "Ian Mandila", 22, "PH101", "Physics");
+    system.addMarks("REG001", 75);
+    system.addMarks("REG002", 45);
+    system.addMarks("REG003", 85);
+
+    system.addMarks("REG001", 90);
+
+    system.displayStudents();
+
+    return 0;
+}
